@@ -1,0 +1,6 @@
+[submodule "onnx_hub/external/onnx-tensorflow"]
+	path = onnx_hub/external/onnx-tensorflow
+	url = https://github.com/onnx/onnx-tensorflow.git
+[submodule "onnx_hub/external/onnx"]
+	path = onnx_hub/external/onnx
+	url = https://github.com/onnx/onnx.git
