@@ -1,0 +1,16 @@
+os: linux
+dist: xenial
+sudo: required
+language: generic
+python:
+  - "2.7"
+  - "3.6"
+
+before_install:
+  - ./.travis/before_install.sh
+
+install:
+  - ./.travis/install.sh
+
+script:
+  - ./.travis/script.sh
