@@ -13,9 +13,9 @@ class PoolMixin(object):
 
   @classmethod
   def pool_op(cls, node, **kwargs):
-    strides = cls.caffe2onnx_param([node.pooling_param.stride])
+    strides = cls.caffe2onnx_param([node.pooling_param.stride], 1)[:2]
     kernel_shape = [node.pooling_param.kernel_size] * 2
-    pads = cls.caffe2onnx_param([node.pooling_param.pad])
+    pads = cls.caffe2onnx_param([node.pooling_param.pad], 0)
 
     node_kwargs = {}
     if "count_include_pad" in kwargs:
@@ -28,9 +28,9 @@ class PoolMixin(object):
         **node_kwargs)
 
   @classmethod
-  def caffe2onnx_param(cls, caffe_param):
+  def caffe2onnx_param(cls, caffe_param, default):
     if len(caffe_param) == 0:
-      onnx_param = [0] * 4
+      onnx_param = [default] * 4
     elif len(caffe_param) == 1:
       onnx_param = [caffe_param[0]] * 4
     elif len(caffe_param) == 2:

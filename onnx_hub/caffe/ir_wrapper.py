@@ -72,14 +72,24 @@ class IRGraph(object):
   # This list holds the protobuf objects of type ValueInfoProto
   # representing the input to the converted ONNX graph.
   @property
-  def input_names(self):
-    return self._placeholer_names + self._consts.keys()
+  def inputs(self):
+    inputs = []
+    for name, value in self._consts.items():
+      inputs.append([name, value.dtype, value.shape])
+    for ph in self._placeholer_names:
+      # treat placeholder as fp32
+      inputs.append([ph, np.dtype('f4'), [u'?']*4])
+    return inputs
 
   @property
   def input_proto(self):
     in_proto = []
-    for input_name in self.input_names:
-      proto = make_tensor_value_info(input_name, TensorProto.FLOAT, [u'?']*4)
+    for input_entry in self.inputs:
+      input_name = input_entry[0]
+      dtype = input_entry[1]
+      shape = input_entry[2]
+      onnx_dtype = mapping.NP_TYPE_TO_TENSOR_TYPE[dtype]
+      proto = make_tensor_value_info(input_name, onnx_dtype, shape)
       in_proto.append(proto)
     return in_proto
 
@@ -119,8 +129,7 @@ class IRGraph(object):
   def initializer_proto(self):
     init_proto = []
     for name, value in self._consts.items():
-      np_dtype =  np.array(value).dtype
-      onnx_dtype = mapping.NP_TYPE_TO_TENSOR_TYPE[np_dtype]
+      onnx_dtype = mapping.NP_TYPE_TO_TENSOR_TYPE[value.dtype]
       proto = make_tensor(
         name=name, data_type=onnx_dtype, dims=np.shape(value), vals=value.flatten())
       init_proto.append(proto)
@@ -143,13 +152,20 @@ class IRGraph(object):
         for top in node.top:
           self._placeholer_names.append(top)
         return
+      elif node.type == 'Reshape':
+        self.add_const(node.name+'_0',
+                np.array(node.reshape_param.shape.dim, dtype="i4"))
+        return
 
       ir_node = IRNode(node, node.name, node.type, node.bottom, node.top)
       self._nodes.append(ir_node)
       for blob_idx in range(len(node.blobs)):
         blob = node.blobs[blob_idx]
-        blob = np.reshape(blob.data, blob.shape.dim)
-        self.add_const(node.name+'_'+str(blob_idx), blob)
+        np_blob = np.array(blob.data, dtype="f4")
+        np_blob = np.reshape(np_blob, blob.shape.dim)
+        if node.type == 'InnerProduct':
+          np_blob = np_blob.transpose()
+        self.add_const(node.name+'_'+str(blob_idx), np_blob)
 
       for bottom in node.bottom:
         self.add_var(bottom)
