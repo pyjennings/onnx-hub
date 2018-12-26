@@ -4,3 +4,6 @@
 [submodule "onnx_hub/external/onnx"]
 	path = onnx_hub/external/onnx
 	url = https://github.com/onnx/onnx.git
+[submodule "onnx_hub/external/models"]
+	path = onnx_hub/external/models
+	url = https://github.com/pyjennings/models.git
