@@ -1,4 +1,4 @@
-from caffe.proto import caffe_pb2
+from onnx_hub.caffe.proto import caffe_pb2
 from google.protobuf import text_format
 import onnx
 

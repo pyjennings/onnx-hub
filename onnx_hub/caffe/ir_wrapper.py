@@ -16,7 +16,7 @@ from onnx_tf.common import attr_translator
 from onnx_tf.common import data_type
 from onnx_tf.common import IS_PYTHON3
 
-from caffe.proto.caffe_pb2 import LayerParameter
+from onnx_hub.caffe.proto.caffe_pb2 import LayerParameter
 
 
 class IRNode(object):
